@@ -59,3 +59,17 @@ The new mode selector switched a loaded document from its continuous page-10 pos
 After a full reload, the same document restored directly into focused single-page mode on page 11, confirming that the selected reader mode is persisted alongside the document’s existing reading state.
 
 On a controlled portrait-phone session, the visibly labelled **Page** option activated focused mode with exactly one PDF canvas and a current-page field. Switching the desktop session back to **Scroll** restored continuous rendering of all 181 pages while retaining page 11 and its in-document position.
+
+The live PDF text index completed in-browser and a search for “KPI” returned 824 matches. The panel presented the first match on page 1 with a text preview; moving to the next result navigated the continuous reader to page 2 and updated the result preview accordingly.
+
+A no-match search correctly displayed zero matches with an explanation for scanned PDFs or absent terms. In focused page mode, the same “KPI” search retained its 824 matches, and selecting the page-1 result replaced the page-2 canvas with the matching page-1 canvas, confirming compatible search navigation in both reader modes.
+
+The Ctrl/Cmd+F reader shortcut was revalidated from a closed search panel. It opens the empty in-viewer search field without appending the shortcut key to the query. The status now distinguishes all keyword occurrences from the matching pages that the previous/next controls traverse.
+
+With focus in the reader search field, Escape closed the panel and returned the focused single-page reader to its normal toolbar state.
+
+In a fresh reader session, the completed index reported “824 occurrences on 177 pages” for “KPI”. This confirms the search status distinguishes the total keyword count from the page-level result navigation.
+
+After advancing to the page-2 matching result, selecting its visible preview kept the focused reader on page 2. The preview action now opens the active result rather than resetting to page 1.
+
+At a controlled compact 360 px panel width, the open search UI measured 358 px of client width and 358 px of scroll width, with no horizontal overflow. The input and clear control occupy the first row; the occurrence/page status and previous, next, and close buttons wrap to a visible second row; the active result preview remains full-width below them.

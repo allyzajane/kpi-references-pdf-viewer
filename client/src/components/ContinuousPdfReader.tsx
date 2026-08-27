@@ -2,10 +2,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { clampZoom, getRenderScale, type FitMode, ZOOM_PRESETS } from "@/lib/pdfViewerMath";
+import { findPdfTextMatches, getPdfSearchResultCount, normalizePdfText, type PageTextIndex } from "@/lib/pdfTextSearch";
 import { loadReadingState, saveReadingState, type SavedReadingState } from "@/lib/readingState";
 import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
 import pdfWorker from "pdfjs-dist/legacy/build/pdf.worker.mjs?url";
-import { AlertTriangle, Bookmark, ChevronLeft, ChevronRight, Download, ExternalLink, FileText, Image, ListTree, Loader2, Maximize2, Minimize2, PanelLeft, RefreshCw, RotateCw, ScanLine, ScrollText, X, ZoomIn, ZoomOut } from "lucide-react";
+import { AlertTriangle, Bookmark, ChevronLeft, ChevronRight, Download, ExternalLink, FileText, Image, ListTree, Loader2, Maximize2, Minimize2, PanelLeft, RefreshCw, RotateCw, ScanLine, ScrollText, Search, X, ZoomIn, ZoomOut } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
@@ -153,6 +154,7 @@ export default function ContinuousPdfReader({ selectedDocument, access }: { sele
   const scrollAnimation = useRef<number | null>(null);
   const activePointers = useRef(new Map<number, { x: number; y: number }>());
   const pinchStart = useRef<{ distance: number; scale: number } | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
   const [pdf, setPdf] = useState<PdfDocument | null>(null);
   const [basePageSize, setBasePageSize] = useState<PageSize | null>(null);
   const [page, setPage] = useState(1);
@@ -172,12 +174,20 @@ export default function ContinuousPdfReader({ selectedDocument, access }: { sele
   const [navigatorOpen, setNavigatorOpen] = useState(false);
   const [navigatorTab, setNavigatorTab] = useState<"thumbnails" | "bookmarks">("thumbnails");
   const [outline, setOutline] = useState<OutlineItem[]>([]);
+  const [textIndex, setTextIndex] = useState<PageTextIndex>({});
+  const [indexedPages, setIndexedPages] = useState(0);
+  const [isIndexingText, setIsIndexingText] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeSearchResult, setActiveSearchResult] = useState(0);
 
   const pageCount = pdf?.numPages ?? 0;
   const rotatedBaseSize = useMemo(() => !basePageSize ? null : rotation % 180 === 0 ? basePageSize : { width: basePageSize.height, height: basePageSize.width }, [basePageSize, rotation]);
   const renderScale = useMemo(() => !rotatedBaseSize || !readerSize.width || !readerSize.height ? 1 : getRenderScale(fitMode, manualZoom, rotatedBaseSize, readerSize, 24), [fitMode, manualZoom, readerSize, rotatedBaseSize]);
   const effectiveZoom = Math.round(renderScale * 100);
   const selectedZoom = fitMode === "width" ? "fit-width" : fitMode === "page" ? "fit-page" : ZOOM_PRESETS.includes(effectiveZoom as (typeof ZOOM_PRESETS)[number]) ? String(effectiveZoom) : "custom";
+  const searchMatches = useMemo(() => findPdfTextMatches(textIndex, searchQuery), [searchQuery, textIndex]);
+  const searchResultCount = useMemo(() => getPdfSearchResultCount(searchMatches), [searchMatches]);
 
   const persistReadingState = useCallback((pageNumber: number, pageOffset: number) => {
     if (!pageCount) return;
@@ -189,7 +199,7 @@ export default function ContinuousPdfReader({ selectedDocument, access }: { sele
     const task = pdfjs.getDocument({ url: access.viewerUrl, withCredentials: false });
     const defaultFit = getInitialFitMode();
     pageRefs.current.clear();
-    setPdf(null); setBasePageSize(null); setPage(1); setPageInput("1"); setReaderMode("continuous"); setRotation(0); setFitMode(defaultFit); setManualZoom(1); setOutline([]); setLoading(true); setError(null);
+    setPdf(null); setBasePageSize(null); setPage(1); setPageInput("1"); setReaderMode("continuous"); setRotation(0); setFitMode(defaultFit); setManualZoom(1); setOutline([]); setTextIndex({}); setIndexedPages(0); setIsIndexingText(false); setSearchQuery(""); setActiveSearchResult(0); setLoading(true); setError(null);
     task.promise.then(async loaded => {
       if (cancelled) return;
       const saved = loadReadingState(selectedDocument.id, loaded.numPages);
@@ -206,6 +216,26 @@ export default function ContinuousPdfReader({ selectedDocument, access }: { sele
       setBasePageSize({ width: viewport.width, height: viewport.height });
       setPdf(loaded);
       void loaded.getOutline().then(items => flattenOutline(loaded, items).then(mapped => { if (!cancelled) setOutline(mapped); })).catch(() => { if (!cancelled) setOutline([]); });
+      void (async () => {
+        const indexedText: PageTextIndex = {};
+        if (!cancelled) setIsIndexingText(true);
+        for (let pageNumber = 1; pageNumber <= loaded.numPages; pageNumber += 1) {
+          try {
+            const indexedPage = await loaded.getPage(pageNumber);
+            const content = await indexedPage.getTextContent();
+            indexedText[pageNumber] = normalizePdfText(content.items.map(item => "str" in item ? item.str : "").join(" "));
+          } catch {
+            indexedText[pageNumber] = "";
+          }
+          if (cancelled) return;
+          if (pageNumber % 8 === 0 || pageNumber === loaded.numPages) {
+            setTextIndex({ ...indexedText });
+            setIndexedPages(pageNumber);
+            await new Promise<void>(resolve => window.setTimeout(resolve, 0));
+          }
+        }
+        if (!cancelled) setIsIndexingText(false);
+      })();
     }).catch(reason => {
       if (!cancelled) setError(`Unable to display this document. ${reason instanceof Error ? reason.message : "The PDF could not be opened."}`);
     }).finally(() => { if (!cancelled) setLoading(false); });
@@ -250,6 +280,13 @@ export default function ContinuousPdfReader({ selectedDocument, access }: { sele
     setPage(pageNumber);
     setPageInput(String(pageNumber));
   }, [readerMode]);
+
+  const moveSearchResult = useCallback((direction: 1 | -1) => {
+    if (!searchMatches.length) return;
+    const next = (activeSearchResult + direction + searchMatches.length) % searchMatches.length;
+    setActiveSearchResult(next);
+    scrollToPage(searchMatches[next].page);
+  }, [activeSearchResult, scrollToPage, searchMatches]);
 
   useEffect(() => {
     const saved = restoreRef.current;
@@ -299,6 +336,16 @@ export default function ContinuousPdfReader({ selectedDocument, access }: { sele
     persistReadingState(page, pageOffsetRef.current);
   }, [fitMode, manualZoom, page, pdf, persistReadingState, readerMode, rotation]);
 
+  useEffect(() => {
+    setActiveSearchResult(current => Math.min(current, Math.max(0, searchMatches.length - 1)));
+  }, [searchMatches.length, searchQuery]);
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    const focusFrame = window.requestAnimationFrame(() => searchInputRef.current?.focus());
+    return () => window.cancelAnimationFrame(focusFrame);
+  }, [searchOpen]);
+
   useEffect(() => () => { if (scrollAnimation.current) window.cancelAnimationFrame(scrollAnimation.current); }, []);
 
   const transitionToManual = (scale: number) => { setFitMode("manual"); setManualZoom(clampZoom(scale)); };
@@ -342,8 +389,10 @@ export default function ContinuousPdfReader({ selectedDocument, access }: { sele
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && searchOpen) { event.preventDefault(); setSearchOpen(false); return; }
       if (isEditableTarget(event.target)) return;
-      if (["ArrowRight", "PageDown"].includes(event.key)) { event.preventDefault(); scrollToPage(Math.min(pageCount, page + 1)); }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "f") { event.preventDefault(); event.stopPropagation(); setSearchOpen(true); }
+      else if (["ArrowRight", "PageDown"].includes(event.key)) { event.preventDefault(); scrollToPage(Math.min(pageCount, page + 1)); }
       else if (["ArrowLeft", "PageUp"].includes(event.key)) { event.preventDefault(); scrollToPage(Math.max(1, page - 1)); }
       else if (["+", "="].includes(event.key)) { event.preventDefault(); changeZoom(1); }
       else if (event.key === "-") { event.preventDefault(); changeZoom(-1); }
@@ -352,7 +401,7 @@ export default function ContinuousPdfReader({ selectedDocument, access }: { sele
     };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [page, pageCount, scrollToPage]);
+  }, [page, pageCount, scrollToPage, searchOpen]);
 
   return <section ref={stageRef} className="pdf-reader flex min-h-0 flex-1 flex-col overflow-hidden bg-[#eceae4]">
     <header className="continuous-reader-header shrink-0 border-b border-stone-300/80 bg-[#f8f7f3] px-3 py-3 sm:px-5 sm:py-4">
@@ -361,6 +410,7 @@ export default function ContinuousPdfReader({ selectedDocument, access }: { sele
         <div className="continuous-reader-controls flex flex-wrap items-center gap-1 2xl:justify-end">
           <div role="group" aria-label="Reading mode" className="flex h-10 items-center rounded-xl border border-stone-300 bg-white p-0.5"><button type="button" onClick={() => setReaderMode("continuous")} className={cn("flex h-full items-center gap-1 rounded-lg px-2 text-[11px] font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#355d54]", readerMode === "continuous" ? "bg-[#e2eee9] text-[#244b42]" : "text-stone-500 hover:text-stone-800")} aria-pressed={readerMode === "continuous"} title="Continuous multi-page reading"><ScrollText className="size-3.5" /><span>Scroll</span></button><button type="button" onClick={() => setReaderMode("single")} className={cn("flex h-full items-center gap-1 rounded-lg px-2 text-[11px] font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#355d54]", readerMode === "single" ? "bg-[#e2eee9] text-[#244b42]" : "text-stone-500 hover:text-stone-800")} aria-pressed={readerMode === "single"} title="Focused single-page reading"><FileText className="size-3.5" /><span>Page</span></button></div>
           <Button variant="ghost" size="icon" className={cn("size-10 rounded-xl text-stone-700 hover:bg-stone-200", navigatorOpen && "bg-stone-200 text-stone-950")} onClick={() => setNavigatorOpen(value => !value)} aria-label={navigatorOpen ? "Close page navigator" : "Open page navigator"} title="Thumbnails and bookmarks"><PanelLeft className="size-4" /></Button>
+          <Button variant="ghost" size="icon" className={cn("size-10 rounded-xl text-stone-700 hover:bg-stone-200", searchOpen && "bg-stone-200 text-stone-950")} onClick={() => setSearchOpen(value => !value)} aria-label={searchOpen ? "Close document search" : "Search document text"} title="Search document text"><Search className="size-4" /></Button>
           <Button variant="ghost" size="icon" className="size-10 rounded-xl text-stone-700 hover:bg-stone-200" onClick={() => changeZoom(-1)} disabled={!pdf || loading} aria-label="Zoom out"><ZoomOut className="size-4" /></Button>
           <output aria-live="polite" className="min-w-12 text-center font-[family-name:var(--font-mono)] text-[11px] font-semibold text-stone-700">{effectiveZoom}%</output>
           <label className="sr-only" htmlFor="continuous-zoom-level">Zoom level</label><select id="continuous-zoom-level" value={selectedZoom} onChange={event => setPreset(event.target.value)} disabled={!pdf || loading} className="h-10 rounded-lg border border-stone-300 bg-white px-2 text-xs font-medium text-stone-700 outline-none transition focus:border-[#355d54] focus:ring-2 focus:ring-[#355d54]/25 disabled:opacity-40"><option value="fit-width">Fit width</option><option value="fit-page">Fit page</option>{ZOOM_PRESETS.map(preset => <option key={preset} value={preset}>{preset}%</option>)}{selectedZoom === "custom" && <option value="custom" disabled>{effectiveZoom}%</option>}</select>
@@ -374,6 +424,7 @@ export default function ContinuousPdfReader({ selectedDocument, access }: { sele
           <Button variant="ghost" className="h-10 rounded-xl px-3 text-xs text-stone-700 hover:bg-stone-200" onClick={() => void toggleFullscreen()} aria-label={isFullscreen ? "Exit reader fullscreen" : "Enter reader fullscreen"}>{isFullscreen ? <><Minimize2 className="mr-1.5 size-4" />Exit</> : <Maximize2 className="size-4" />}</Button>
         </div>
       </div>
+      {searchOpen && <form className="pdf-search-panel mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-stone-300 bg-white p-2 shadow-sm" onSubmit={event => { event.preventDefault(); moveSearchResult(1); }}><label className="sr-only" htmlFor="pdf-text-search">Find text in document</label><div className="relative min-w-[min(100%,14rem)] flex-1"><Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-stone-400" /><Input ref={searchInputRef} id="pdf-text-search" value={searchQuery} onChange={event => setSearchQuery(event.target.value)} placeholder="Find in document" className="h-10 border-stone-300 pl-9 pr-9 text-sm shadow-none focus-visible:ring-[#355d54]" /><button type="button" onClick={() => setSearchQuery("")} className={cn("absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-stone-400 transition hover:bg-stone-100 hover:text-stone-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#355d54]", !searchQuery && "invisible")} aria-label="Clear document search"><X className="size-3.5" /></button></div><output aria-live="polite" className="min-w-24 text-center font-[family-name:var(--font-mono)] text-[11px] font-semibold text-stone-600">{isIndexingText ? `Indexing ${indexedPages}/${pageCount}` : searchQuery ? `${searchResultCount} occurrence${searchResultCount === 1 ? "" : "s"} on ${searchMatches.length} page${searchMatches.length === 1 ? "" : "s"}` : "Find text"}</output><Button type="button" variant="ghost" size="icon" className="size-9 rounded-lg text-stone-700 hover:bg-stone-100" onClick={() => moveSearchResult(-1)} disabled={!searchMatches.length} aria-label="Previous matching page"><ChevronLeft className="size-4" /></Button><Button type="submit" variant="ghost" size="icon" className="size-9 rounded-lg text-stone-700 hover:bg-stone-100" disabled={!searchMatches.length} aria-label="Next matching page"><ChevronRight className="size-4" /></Button><Button type="button" variant="ghost" size="icon" className="size-9 rounded-lg text-stone-600 hover:bg-stone-100" onClick={() => setSearchOpen(false)} aria-label="Close document search"><X className="size-4" /></Button>{searchQuery && !isIndexingText && searchMatches.length > 0 && <div className="max-h-28 w-full overflow-y-auto border-t border-stone-100 pt-1"><button type="button" onClick={() => scrollToPage(searchMatches[activeSearchResult]?.page ?? searchMatches[0].page)} className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-left text-xs text-stone-600 hover:bg-stone-100"><span className="font-[family-name:var(--font-mono)] font-semibold text-[#355d54]">Page {searchMatches[activeSearchResult]?.page ?? searchMatches[0].page}</span><span className="truncate">{searchMatches[activeSearchResult]?.preview ?? searchMatches[0].preview}</span></button></div>}{searchQuery && !isIndexingText && searchMatches.length === 0 && <p className="w-full px-2 pb-1 text-xs text-stone-500">No text matches found. This PDF may be scanned or the term may not appear.</p>}</form>}
     </header>
     <div className="relative flex min-h-0 flex-1 overflow-hidden">
       {navigatorOpen && <aside className="absolute inset-y-0 left-0 z-30 flex w-[min(18rem,86vw)] shrink-0 flex-col border-r border-stone-300 bg-[#fbfaf7] shadow-xl lg:static lg:w-72 lg:shadow-none"><div className="flex items-center justify-between border-b border-stone-200 px-3 py-3"><div className="flex items-center gap-1 rounded-lg bg-stone-100 p-1"><button onClick={() => setNavigatorTab("thumbnails")} className={cn("flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold", navigatorTab === "thumbnails" ? "bg-white text-[#244b42] shadow-sm" : "text-stone-500 hover:text-stone-700")}><Image className="size-3.5" />Pages</button><button onClick={() => setNavigatorTab("bookmarks")} className={cn("flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold", navigatorTab === "bookmarks" ? "bg-white text-[#244b42] shadow-sm" : "text-stone-500 hover:text-stone-700")}><Bookmark className="size-3.5" />Bookmarks</button></div><Button variant="ghost" size="icon" className="size-8 rounded-lg text-stone-600 hover:bg-stone-200" onClick={() => setNavigatorOpen(false)} aria-label="Close page navigator"><X className="size-4" /></Button></div><div ref={setThumbnailRoot} className="min-h-0 flex-1 overflow-y-auto p-2">{navigatorTab === "thumbnails" ? !pdf ? <div className="flex h-full items-center justify-center text-xs text-stone-500">Loading pages…</div> : <div className="space-y-1">{Array.from({ length: pageCount }, (_, index) => <Thumbnail key={index + 1} pdf={pdf} pageNumber={index + 1} active={page === index + 1} rotation={rotation} root={thumbnailRoot} onSelect={() => { scrollToPage(index + 1); if (window.innerWidth < 1024) setNavigatorOpen(false); }} />)}</div> : outline.length ? <nav aria-label="Document bookmarks" className="space-y-1">{outline.map((item, index) => <button key={`${item.title}-${index}`} onClick={() => item.page && scrollToPage(item.page)} disabled={!item.page} style={{ paddingLeft: `${0.65 + item.depth * 0.75}rem` }} className="flex w-full items-center gap-2 rounded-lg py-2 pr-2 text-left text-sm text-stone-700 transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-50"><ListTree className="size-3.5 shrink-0 text-[#52776f]" /><span className="min-w-0 flex-1 truncate">{item.title}</span>{item.page && <span className="font-[family-name:var(--font-mono)] text-[10px] text-stone-400">{item.page}</span>}</button>)}</nav> : <div className="flex h-full flex-col items-center justify-center px-5 text-center"><Bookmark className="mb-3 size-7 text-stone-300" /><p className="text-sm font-semibold text-stone-700">No embedded bookmarks</p><p className="mt-1 text-xs leading-5 text-stone-500">This PDF does not include an outline.</p></div>}</div></aside>}

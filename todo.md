@@ -40,3 +40,11 @@
 - [x] Add an accessible reader-mode control that switches between continuous scrolling and focused single-page viewing.
 - [x] Persist the preferred reader mode with each authorized document’s existing reading state and preserve the current page when switching.
 - [x] Validate continuous and single-page modes across desktop and mobile viewports.
+- [x] Extract and index searchable text for each page of the selected PDF without exposing document content outside the reader.
+- [x] Add accessible in-viewer keyword search with match count, next/previous navigation, clear state, and keyboard entry.
+- [x] Support search-result navigation in continuous and focused single-page modes while preserving reader state.
+- [x] Test search indexing, no-results handling, match navigation, and responsive search controls.
+- [x] Ensure the Ctrl/Cmd+F search shortcut opens and focuses the reader search field without adding an unintended character to the query.
+- [x] Ensure Escape closes the search panel even when focus is inside the search field.
+- [x] Fix the search preview/result button so it navigates to the currently displayed active result rather than the first match.
+- [x] Live-verify the search panel controls at compact/mobile widths and record their wrapping, visibility, and usability.
