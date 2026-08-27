@@ -340,6 +340,10 @@ export default function Home() {
   const access = documentAccessQuery.data ?? null;
 
   useEffect(() => {
+    document.title = documentsQuery.isLoading ? "Opening KPI References..." : "KPI References";
+  }, [documentsQuery.isLoading]);
+
+  useEffect(() => {
     if (!documentsQuery.data) return;
     setSelectedId(current => {
       if (current && documents.some(item => item.id === current)) return current;

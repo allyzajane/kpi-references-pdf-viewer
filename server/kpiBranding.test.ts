@@ -19,7 +19,12 @@ describe("KPI brand treatment", () => {
     expect(html).toContain("data:image/svg+xml");
     expect(html).toContain("%23F7CE62");
     expect(html).toContain("%231890CF");
-    expect(html).toContain("<title>KPI References</title>");
+    expect(html).toContain("<title>Opening KPI References...</title>");
+  });
+
+  it("changes the loading tab title to the ready KPI References title", () => {
+    const home = readFileSync(resolve(projectRoot, "client/src/pages/Home.tsx"), "utf8");
+    expect(home).toContain('document.title = documentsQuery.isLoading ? "Opening KPI References..." : "KPI References"');
   });
 
   it("retains every provided blue theme color", () => {
