@@ -101,3 +101,22 @@
 - [x] Rename the browser-tab title to KPI References to match the visible portal brand.
 - [x] Add a branded browser-tab loading title that changes to KPI References when the portal is ready.
 - [x] Ensure the browser favicon uses the golden KPI key icon consistently with the portal brand.
+- [x] Audit source, metadata, runtime dependencies, and generated output for visible platform branding and platform-domain references while preserving third-party license notices.
+- [x] Replace platform-specific application runtime plumbing with a Cloudflare Pages-compatible implementation that preserves secure server-side Google Drive access.
+- [x] Remove visible platform branding, attribution, external branding scripts, platform metadata, and platform assets from the independent project source.
+- [x] Add Cloudflare Pages deployment configuration and documentation, including the required server-side Google Drive environment variables.
+- [x] Verify an independent production build, test suite, secure document listing/streaming behavior, and zero visible platform-branding or platform-domain references in exportable source.
+- [ ] Run the Cloudflare Pages Functions implementation against the configured Drive credentials and verify real list, access, and PDF streaming routes without disclosing access context.
+- [x] Add route-level tests for the Cloudflare Pages document list, access, and content handlers, including download permission and Drive resource-key non-disclosure behavior.
+- [x] Allow the managed preview host in Vite development configuration without adding platform branding or changing Cloudflare production behavior.
+- [x] Serve the secure Drive document API during Vite development previews without embedding credentials in the client or changing Cloudflare Pages production routes.
+- [x] Diagnose and correct the Cloudflare deployment configuration error concerning the Vite plugins array while preserving the independent Vite and Pages Functions project structure.
+- [ ] Complete or hand off Cloudflare Pages deployment after the browser-based authorization route failed to complete.
+- [ ] Complete Cloudflare Pages authorization with a scoped API token or through the user’s local terminal because the sandbox OAuth loopback callback is unavailable.
+- [x] Write a standalone step-by-step Cloudflare Pages deployment guide tailored to KPI References and its secure Google Drive configuration.
+- [x] Clarify and implement the requested in-app Cloudflare deployment or setup experience without exposing Google Drive credentials in the browser.
+- [x] Add a protected in-app Drive configuration screen that verifies folder access and reports safe status information without exposing secret values.
+- [x] Protect the `/setup` status interaction and its server-side route with a server-only operator access token.
+- [x] Add regression coverage for authorized and unauthorized Drive status checks, then revalidate the protected screen in the browser.
+- [ ] Fix the running status route so a valid installed operator token returns safe configuration status while no token remains unauthorized.
+- [ ] Revalidate the protected status screen with a valid token in the running preview before checkpointing.
