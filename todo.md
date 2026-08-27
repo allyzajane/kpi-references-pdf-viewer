@@ -80,3 +80,7 @@
 - [x] Preserve responsive mobile document selection and ensure the reader regains available width when the sidebar is collapsed.
 - [x] Test expanded and collapsed Documents sidebar states with live document loading across desktop and compact layouts.
 - [x] Live-test compact/mobile document selection and loading after the sidebar update, then record the stacked-selector behavior.
+- [x] Design and implement a compact golden KPI key brand icon to replace the current book mark.
+- [x] Apply the new KPI key icon consistently to the portal header and collapsed Documents rail.
+- [x] Validate clarity, contrast, and sizing of the KPI key icon in expanded, collapsed, and compact responsive layouts.
+- [x] Live-verify the golden KPI key mark in a compact/mobile viewport and record its size and contrast.
