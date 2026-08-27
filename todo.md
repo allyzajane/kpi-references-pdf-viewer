@@ -53,3 +53,13 @@
 - [x] Replace the Find-only launcher with an always-visible, clearly labelled document-text search field in the PDF viewer header.
 - [x] Keep search results, keyboard access, and responsive reader controls usable with the visible header field.
 - [x] Validate the visible search field in desktop and compact-width reader layouts.
+- [x] Move the document-text search input beside the fullscreen control in the reader toolbar and remove the added header row.
+- [x] Preserve usable result feedback and navigation without increasing the reader header height.
+- [x] Validate the one-row desktop toolbar and compact responsive fallback.
+- [x] Prevent the integrated search form from wrapping onto a second row, keeping it directly beside fullscreen with a horizontal toolbar fallback on narrow readers.
+- [x] Restore understandable no-results feedback and compact-width search status in the integrated toolbar.
+- [x] Live-verify the final one-row toolbar at compact widths, including its horizontal-scroll fallback and usable search controls.
+- [x] Make the on-screen integrated toolbar match status clearly describe matching occurrences and pages at compact widths.
+- [x] Live-test the final toolbar at a real compact viewport, including input, clear, no-results, and matching-page navigation controls.
+- [x] Live-verify the final one-row search toolbar in an actual compact viewport, including input entry, clear, no-results feedback, matching-page navigation, and horizontal scrolling.
+- [x] Re-run the compact toolbar interaction test at a measured 390×844 CSS viewport and record input, clear, no-results, navigation, and horizontal-scroll behavior.
