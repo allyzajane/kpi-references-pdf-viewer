@@ -18,6 +18,7 @@ type DriveFileResponse = {
   id: string;
   name: string;
   mimeType: string;
+  resourceKey?: string;
   modifiedTime?: string;
   size?: string;
   description?: string | null;
@@ -157,11 +158,12 @@ async function driveFetch(path: string, query: Record<string, string> = {}, init
   return fetch(url, { ...init, headers });
 }
 
-async function fetchPublicDriveDownload(fileId: string): Promise<Response> {
+async function fetchPublicDriveDownload(fileId: string, resourceKey?: string): Promise<Response> {
   const url = new URL("https://drive.usercontent.google.com/download");
   url.searchParams.set("id", fileId);
   url.searchParams.set("export", "download");
   url.searchParams.set("confirm", "t");
+  if (resourceKey) url.searchParams.set("resourcekey", resourceKey);
   return fetch(url, { redirect: "follow" });
 }
 
@@ -225,7 +227,7 @@ export function orderDocuments(documents: PortalDocument[]): PortalDocument[] {
   });
 }
 
-export async function listDrivePdfDocuments(): Promise<PortalDocument[]> {
+async function listDrivePdfFiles(): Promise<DriveFileResponse[]> {
   const { folderId } = getDriveSettings();
   const files: DriveFileResponse[] = [];
   let pageToken: string | undefined;
@@ -233,7 +235,7 @@ export async function listDrivePdfDocuments(): Promise<PortalDocument[]> {
   do {
     const response = await driveFetch("/files", {
       q: `'${folderId.replace(/'/g, "\\'")}' in parents and trashed = false and mimeType = '${PDF_MIME_TYPE}'`,
-      fields: "nextPageToken,files(id,name,mimeType,modifiedTime,size,description,webViewLink,webContentLink,capabilities(canDownload))",
+      fields: "nextPageToken,files(id,name,mimeType,resourceKey,modifiedTime,size,description,webViewLink,webContentLink,capabilities(canDownload))",
       orderBy: "name_natural",
       pageSize: "1000",
       supportsAllDrives: "true",
@@ -247,7 +249,11 @@ export async function listDrivePdfDocuments(): Promise<PortalDocument[]> {
     pageToken = payload.nextPageToken;
   } while (pageToken);
 
-  return orderDocuments(files.filter(isPdfDriveFile).map(mapDriveFile));
+  return files.filter(isPdfDriveFile);
+}
+
+export async function listDrivePdfDocuments(): Promise<PortalDocument[]> {
+  return orderDocuments((await listDrivePdfFiles()).map(mapDriveFile));
 }
 
 export async function verifyDriveFolderAccess(): Promise<{ id: string; name: string; mimeType: string }> {
@@ -280,7 +286,7 @@ export async function verifyDriveFolderAccess(): Promise<{ id: string; name: str
 
 async function getPdfMetadata(fileId: string): Promise<DriveFileResponse> {
   const response = await driveFetch(`/${encodeURIComponent(fileId)}`, {
-    fields: "id,name,mimeType,modifiedTime,size,description,webViewLink,capabilities(canDownload)",
+    fields: "id,name,mimeType,resourceKey,modifiedTime,size,description,webViewLink,capabilities(canDownload)",
     supportsAllDrives: "true",
   });
   if (!response.ok) throw await parseDriveFailure(response, "The selected Google Drive document is unavailable.");
@@ -291,25 +297,31 @@ async function getPdfMetadata(fileId: string): Promise<DriveFileResponse> {
   return file;
 }
 
-export async function getPdfDocument(fileId: string): Promise<PortalDocument> {
+async function getPdfFileWithAccessContext(fileId: string): Promise<DriveFileResponse> {
   if (getDriveSettings().mode === "public") {
-    const document = (await listDrivePdfDocuments()).find(item => item.id === fileId);
-    if (!document) {
+    const file = (await listDrivePdfFiles()).find(item => item.id === fileId);
+    if (!file) {
       throw new DrivePortalError("This document is no longer available in the configured Drive folder.", 404, "unavailable");
     }
-    return document;
+    return file;
   }
-  return mapDriveFile(await getPdfMetadata(fileId));
+  return getPdfMetadata(fileId);
+}
+
+export async function getPdfDocument(fileId: string): Promise<PortalDocument> {
+  return mapDriveFile(await getPdfFileWithAccessContext(fileId));
 }
 
 export async function getPdfMediaResponse(fileId: string): Promise<{ document: PortalDocument; response: Response }> {
-  const document = await getPdfDocument(fileId);
+  const file = await getPdfFileWithAccessContext(fileId);
+  const document = mapDriveFile(file);
   let response = await driveFetch(`/${encodeURIComponent(fileId)}`, {
     alt: "media",
     supportsAllDrives: "true",
+    ...(file.resourceKey ? { resourceKey: file.resourceKey } : {}),
   });
   if (!response.ok && getDriveSettings().mode === "public") {
-    const publicDownload = await fetchPublicDriveDownload(fileId);
+    const publicDownload = await fetchPublicDriveDownload(fileId, file.resourceKey);
     if (publicDownload.ok) response = publicDownload;
   }
   if (!response.ok) throw await parseDriveFailure(response, "The selected PDF could not be loaded.");

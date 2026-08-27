@@ -24,6 +24,7 @@ describe("Google Drive portal configuration", () => {
     const result = await getPdfMediaResponse(document.id);
 
     expect(result.document.id).toBe(document.id);
+    expect(result.document).not.toHaveProperty("resourceKey");
     expect(result.response.ok).toBe(true);
     expect(["application/pdf", "application/octet-stream"]).toContain(result.response.headers.get("content-type")?.toLowerCase());
     const firstBytes = new Uint8Array(await result.response.arrayBuffer()).slice(0, 4);

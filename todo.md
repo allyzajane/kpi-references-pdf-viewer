@@ -84,3 +84,16 @@
 - [x] Apply the new KPI key icon consistently to the portal header and collapsed Documents rail.
 - [x] Validate clarity, contrast, and sizing of the KPI key icon in expanded, collapsed, and compact responsive layouts.
 - [x] Live-verify the golden KPI key mark in a compact/mobile viewport and record its size and contrast.
+- [x] Apply the supplied blue palette across the portal’s principal surfaces, controls, active states, and loading treatments while retaining readable contrast.
+- [x] Set a golden KPI key favicon for the browser tab without introducing an external asset dependency.
+- [x] Add an accessible hover/focus tooltip reading “Key Performance Indicator” to the golden KPI key logo.
+- [x] Replace document collection, access, and PDF opening/loading spinners with a KPI key-themed loading animation.
+- [x] Add regression coverage and validate the themed branding, tooltip, favicon configuration, and loading indicators across responsive layouts.
+- [x] Replace remaining legacy green and stone interactive/active-state treatments with the supplied blue palette and recheck contrast.
+- [x] Confirm the KPI key tooltip becomes visibly opaque on both keyboard focus and hover in desktop and compact layouts, then record the result.
+- [x] Recheck the transient live document-content 404 and confirm that the themed loading flow resolves to a rendered PDF before release.
+- [x] Replace the remaining raw legacy green and stone interactive/active styles in reader and Documents source with explicit supplied blue-palette values.
+- [x] Prove the KPI key tooltip becomes visible from actual pointer hover and keyboard focus at desktop and compact viewports.
+- [x] Diagnose and resolve the current Drive list/content mismatch so the default Business Plan KPI PDF opens through the secure content route.
+- [x] Replace remaining raw legacy green and stone interactive/active class names and hex values in Home and ContinuousPdfReader with the supplied blue palette.
+- [x] Recheck principal controls and active states in desktop and compact readers after the source-level palette replacement.
