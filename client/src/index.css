@@ -122,6 +122,7 @@
   body {
     @apply bg-background text-foreground;
     font-family: "DM Sans", sans-serif;
+    overflow: hidden;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
@@ -176,5 +177,73 @@
       padding-right: 2rem;
       max-width: 1280px; /* Standard content width */
     }
+  }
+}
+
+.pdf-reader:fullscreen {
+  width: 100vw;
+  height: 100dvh;
+  background: #eceae4;
+}
+
+.pdf-reader:fullscreen .pdf-viewport {
+  padding: clamp(0.75rem, 2vw, 2rem);
+}
+
+.pdf-viewport {
+  touch-action: pan-y;
+}
+
+.pdf-landscape-picker {
+  display: none;
+}
+
+@media (orientation: landscape) and (min-width: 640px) and (max-width: 1023px) and (max-height: 560px) {
+  .reader-heading {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .reader-heading > div:first-child {
+    max-width: 31%;
+  }
+
+  .reader-heading > div:last-child {
+    flex-wrap: nowrap;
+  }
+
+  .reader-fit-page-button {
+    display: none;
+  }
+
+  .pdf-navigator-header {
+    padding-top: 0.6rem;
+    padding-bottom: 0.6rem;
+  }
+
+  .pdf-navigator-header > div:first-child {
+    margin-bottom: 0.35rem;
+  }
+
+  .pdf-navigator-header h2 {
+    font-size: 1.1rem;
+  }
+
+  .pdf-navigator-search,
+  .pdf-navigator-count,
+  .pdf-navigator-list {
+    display: none;
+  }
+
+  .pdf-landscape-picker {
+    display: block;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
   }
 }

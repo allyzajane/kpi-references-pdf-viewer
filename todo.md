@@ -20,3 +20,11 @@
 - [x] Add a route-level regression test for unavailable, unauthorized, invalid, and empty-response PDF stream failures, and record the resolved fullscreen root cause.
 - [x] State the Google Cloud Credentials-page manual verification step explicitly in the setup instructions.
 - [x] Add a route-level invalid/non-PDF Drive response assertion to the PDF-stream regression suite.
+- [x] Diagnose why the reported visual-editor change was not persisted and verify the correct save workflow.
+- [x] Replace fixed viewer sizing with container-derived responsive height and width across desktop, tablet, portrait mobile, landscape mobile, and viewer-only fullscreen.
+- [x] Add Fit to Width, Fit to Page, live zoom percentage, preset zoom selection, rotation, page-input navigation, and keyboard navigation controls.
+- [x] Improve touch-friendly controls, high-DPI canvas rendering, responsive focus states, and pinch-to-zoom support where the browser provides it.
+- [x] Make viewer-only fullscreen preserve page state, recompute fit scale, and offer an accessible exit path with graceful fallback messaging.
+- [x] Verify responsive reader behavior across phone, tablet, laptop, large desktop, and fullscreen viewport sizes.
+- [x] Verify the reader with a loaded PDF at a large-desktop viewport and record its adaptive canvas and toolbar behavior.
+- [x] Confirm a loaded PDF canvas at a 1920×1080 desktop viewport and persist the live verification result.
