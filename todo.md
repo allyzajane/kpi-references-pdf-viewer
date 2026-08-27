@@ -97,3 +97,4 @@
 - [x] Diagnose and resolve the current Drive list/content mismatch so the default Business Plan KPI PDF opens through the secure content route.
 - [x] Replace remaining raw legacy green and stone interactive/active class names and hex values in Home and ContinuousPdfReader with the supplied blue palette.
 - [x] Recheck principal controls and active states in desktop and compact readers after the source-level palette replacement.
+- [x] Rename the visible portal brand from Folio to KPI References.
