@@ -11,6 +11,12 @@
 - [x] Add automated tests for Drive document validation, ordering, and access-state mapping.
 - [x] Verify desktop and mobile layouts, core viewer flows, and error states.
 - [x] Configure the active portal connection for a public Drive folder using a restricted server-side Google Drive API key.
-- [ ] Verify the API key’s Google Cloud restrictions and record the recommended restriction settings in the portal setup notes.
+- [x] Document the required Google Cloud API-key restriction settings and the owner-side manual verification step in the portal setup notes.
 - [x] Add a typed document-access procedure for browser viewer and permission-aware download URLs, then consume it in the viewer.
 - [x] Add automated coverage for unavailable, unauthorized, invalid, and unexpected-content Drive error mappings.
+- [x] Reproduce the reported document-unavailable response for the selected Drive file and identify its specific server-side cause.
+- [x] Improve the viewer’s unavailable-state message and fullscreen fallback guidance for embedded preview contexts.
+- [x] Retest affected document actions and record the corrected behavior.
+- [x] Add a route-level regression test for unavailable, unauthorized, invalid, and empty-response PDF stream failures, and record the resolved fullscreen root cause.
+- [x] State the Google Cloud Credentials-page manual verification step explicitly in the setup instructions.
+- [x] Add a route-level invalid/non-PDF Drive response assertion to the PDF-stream regression suite.

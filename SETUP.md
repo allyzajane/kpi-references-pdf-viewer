@@ -18,11 +18,17 @@ Enable the Google Drive API in the API Library for the Cloud project that owns t
 
 Restrict the API key to the **Google Drive API** in **APIs & Services → Credentials**. Google recommends both API and client restrictions for API keys. [3] Because Folio makes the key’s request from its server rather than the browser, do not set a browser-referrer restriction. An IP restriction is feasible only if the deployed hosting environment has stable, known egress IP addresses; otherwise, keep the key stored exclusively as a server secret, rotate it if exposed, and monitor its usage.
 
+**Owner verification step:** In Google Cloud Console, open **APIs & Services → Credentials**, select the API key used by Folio, and confirm under **API restrictions** that **Google Drive API** is the only permitted service. This review must be completed by a project owner with Google Cloud Console access; the portal cannot inspect or expose the key’s restriction configuration.
+
 ## Portal behavior
 
 The portal lists only Drive files whose MIME type is `application/pdf`, orders them by natural filename order, and displays each file’s Drive ID, modification date, and size. Optional groups are created from a Drive description such as `Category: Policies`; files without that tag appear under **Documents**.
 
 While the portal is open, it checks the folder every 60 seconds and after the browser regains focus. The refresh control invokes the same server-side listing endpoint immediately. The selected document ID is saved locally only while it remains in the current authorized listing; otherwise Folio clears it and selects the first available PDF.
+
+## Preview-mode fullscreen
+
+The Fullscreen API is controlled by the browser and may be unavailable in an embedded preview. Folio keeps that limitation separate from the PDF error state, so a blocked fullscreen request does not mark the active document as unavailable. Use **Open in a new tab** or publish the portal to test fullscreen in a top-level page.
 
 > If the folder should not be public, change `DRIVE_PORTAL_ACCESS_MODE` to `private`, remove the API key from the active configuration, and configure a dedicated service account with **Viewer** access to the Drive folder. The backend already supports this mode; it is safer than broad public sharing for internal documents.
 

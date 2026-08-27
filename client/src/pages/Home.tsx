@@ -40,6 +40,8 @@ function ViewerCanvas({ selectedDocument, access }: { selectedDocument: PortalDo
   const [rendering, setRendering] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [retryVersion, setRetryVersion] = useState(0);
+  const [fullscreenNotice, setFullscreenNotice] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -49,7 +51,7 @@ function ViewerCanvas({ selectedDocument, access }: { selectedDocument: PortalDo
       if (!cancelled) setError(`Unable to display this document. ${reason instanceof Error ? reason.message : "The PDF could not be opened."}`);
     }).finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; task.destroy(); };
-  }, [access.viewerUrl, selectedDocument.id]);
+  }, [access.viewerUrl, retryVersion, selectedDocument.id]);
 
   useEffect(() => {
     const onFullscreenChange = () => setIsFullscreen(Boolean(globalThis.document.fullscreenElement));
@@ -98,7 +100,7 @@ function ViewerCanvas({ selectedDocument, access }: { selectedDocument: PortalDo
   const changeZoom = (direction: 1 | -1) => { setFitWidth(false); setZoom(current => Math.min(2.5, Math.max(0.5, Number((current + direction * 0.15).toFixed(2))))); };
   const toggleFullscreen = async () => {
     try { if (globalThis.document.fullscreenElement) await globalThis.document.exitFullscreen(); else await stageRef.current?.requestFullscreen(); }
-    catch { setError("Fullscreen mode is not available in this browser context."); }
+    catch { setFullscreenNotice("Fullscreen is blocked in this embedded preview. Use “Open in a new tab” or publish the portal to use fullscreen."); }
   };
 
   return <section ref={stageRef} className="flex min-h-0 flex-1 flex-col bg-[#eceae4]">
@@ -117,7 +119,8 @@ function ViewerCanvas({ selectedDocument, access }: { selectedDocument: PortalDo
     </div>
     <div ref={viewportRef} className="relative flex min-h-[470px] flex-1 items-start justify-center overflow-auto p-5 sm:p-8">
       {loading && <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-[#eceae4]/90 text-stone-600"><Loader2 className="size-7 animate-spin text-[#355d54]" /><p className="text-sm font-medium">Fetching secure document…</p></div>}
-      {error ? <div className="mx-auto my-auto max-w-md rounded-[1.5rem] border border-amber-200 bg-amber-50 p-7 text-center shadow-sm"><div className="mx-auto mb-4 flex size-11 items-center justify-center rounded-full bg-amber-100 text-amber-700"><AlertTriangle className="size-5" /></div><h2 className="font-[family-name:var(--font-display)] text-xl font-semibold text-stone-900">Document unavailable</h2><p className="mt-2 text-sm leading-6 text-stone-600">{error}</p><Button variant="outline" className="mt-5 rounded-full border-stone-300 bg-white" onClick={() => window.location.reload()}>Try again</Button></div> : <div className={cn("relative bg-white shadow-[0_16px_45px_rgba(37,34,29,0.16)]", rendering && "opacity-80")}><canvas ref={canvasRef} className="block max-w-none" aria-label={`Page ${page} of ${selectedDocument.name}`} />{rendering && !loading && <div className="absolute inset-x-0 top-0 h-0.5 overflow-hidden bg-stone-200"><div className="h-full w-1/3 animate-pulse bg-[#355d54]" /></div>}</div>}
+      {error ? <div className="mx-auto my-auto max-w-md rounded-[1.5rem] border border-amber-200 bg-amber-50 p-7 text-center shadow-sm"><div className="mx-auto mb-4 flex size-11 items-center justify-center rounded-full bg-amber-100 text-amber-700"><AlertTriangle className="size-5" /></div><h2 className="font-[family-name:var(--font-display)] text-xl font-semibold text-stone-900">Document cannot be opened</h2><p className="mt-2 text-sm leading-6 text-stone-600">{error}</p><Button variant="outline" className="mt-5 rounded-full border-stone-300 bg-white" onClick={() => setRetryVersion(version => version + 1)}>Retry document</Button></div> : <div className={cn("relative bg-white shadow-[0_16px_45px_rgba(37,34,29,0.16)]", rendering && "opacity-80")}><canvas ref={canvasRef} className="block max-w-none" aria-label={`Page ${page} of ${selectedDocument.name}`} />{rendering && !loading && <div className="absolute inset-x-0 top-0 h-0.5 overflow-hidden bg-stone-200"><div className="h-full w-1/3 animate-pulse bg-[#355d54]" /></div>}</div>}
+      {fullscreenNotice && <div role="status" className="absolute inset-x-4 bottom-4 z-20 mx-auto max-w-xl rounded-xl border border-stone-300 bg-white/95 px-4 py-3 text-center text-xs leading-5 text-stone-700 shadow-lg backdrop-blur"><span>{fullscreenNotice}</span><button className="ml-3 font-semibold text-[#355d54] hover:underline" onClick={() => setFullscreenNotice(null)}>Dismiss</button></div>}
     </div>
     <div className="flex items-center justify-center gap-4 border-t border-stone-300/80 bg-[#f8f7f3] px-5 py-3"><Button variant="ghost" size="icon" className="size-9 rounded-full text-stone-700 hover:bg-stone-200" onClick={() => setPage(current => Math.max(1, current - 1))} disabled={!pdf || page <= 1} aria-label="Previous page"><ChevronLeft className="size-4" /></Button><span className="min-w-24 text-center font-[family-name:var(--font-mono)] text-[11px] text-stone-600">{pageCount ? `${page} / ${pageCount}` : "— / —"}</span><Button variant="ghost" size="icon" className="size-9 rounded-full text-stone-700 hover:bg-stone-200" onClick={() => setPage(current => Math.min(pageCount, current + 1))} disabled={!pdf || page >= pageCount} aria-label="Next page"><ChevronRight className="size-4" /></Button></div>
   </section>;
