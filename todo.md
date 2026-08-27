@@ -106,7 +106,7 @@
 - [x] Remove visible platform branding, attribution, external branding scripts, platform metadata, and platform assets from the independent project source.
 - [x] Add Cloudflare Pages deployment configuration and documentation, including the required server-side Google Drive environment variables.
 - [x] Verify an independent production build, test suite, secure document listing/streaming behavior, and zero visible platform-branding or platform-domain references in exportable source.
-- [ ] Run the Cloudflare Pages Functions implementation against the configured Drive credentials and verify real list, access, and PDF streaming routes without disclosing access context.
+- [x] Run the Cloudflare Pages Functions implementation against the configured Drive credentials and verify real list, access, and PDF streaming routes without disclosing access context.
 - [x] Add route-level tests for the Cloudflare Pages document list, access, and content handlers, including download permission and Drive resource-key non-disclosure behavior.
 - [x] Allow the managed preview host in Vite development configuration without adding platform branding or changing Cloudflare production behavior.
 - [x] Serve the secure Drive document API during Vite development previews without embedding credentials in the client or changing Cloudflare Pages production routes.
