@@ -19,8 +19,12 @@ function developmentDriveApi(): Plugin {
         if (request.method !== "GET") return next();
         try {
           const headers = new Headers();
-          const suppliedToken = request.headers["x-kpi-setup-token"];
-          if (typeof suppliedToken === "string") headers.set("X-KPI-Setup-Token", suppliedToken);
+          const customHeader = request.headers["x-kpi-setup-token"];
+          const authorizationHeader = request.headers.authorization;
+          const suppliedToken = Array.isArray(customHeader) ? customHeader[0] : customHeader;
+          const authorization = Array.isArray(authorizationHeader) ? authorizationHeader[0] : authorizationHeader;
+          if (suppliedToken) headers.set("X-KPI-Setup-Token", suppliedToken);
+          if (authorization) headers.set("Authorization", authorization);
           const handlerResponse = await configurationStatusHandler({ env: process.env as DriveEnvironment, request: new Request("http://localhost/api/configuration/status", { headers }) });
           response.statusCode = handlerResponse.status;
           handlerResponse.headers.forEach((value, key) => response.setHeader(key, value));

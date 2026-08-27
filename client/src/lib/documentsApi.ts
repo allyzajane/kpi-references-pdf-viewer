@@ -47,7 +47,7 @@ export async function getDocumentAccess(fileId: string): Promise<DocumentAccess>
 }
 
 export async function getDriveConnectionStatus(accessToken: string): Promise<DriveConnectionStatus> {
-  const response = await fetch("/api/configuration/status", { cache: "no-store", headers: { "X-KPI-Setup-Token": accessToken } });
+  const response = await fetch("/api/configuration/status", { cache: "no-store", headers: { Authorization: `Bearer ${accessToken}`, "X-KPI-Setup-Token": accessToken } });
   if (!response.ok) throw await readError(response);
   return await response.json() as DriveConnectionStatus;
 }
