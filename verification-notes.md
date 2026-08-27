@@ -53,3 +53,9 @@ The 768×1024 tablet capture displayed the stacked document navigator, complete 
 The final 844×390 landscape measurement confirms that the compact reader keeps its page-control footer rendered at 32 px high, with the current-page field, “of 181” total-page count, and the first PDF canvas simultaneously visible. Continuous reading remains usable without sacrificing essential navigation in the short landscape layout.
 
 Live tablet and landscape reader sessions both scrolled to page 3, changed to a 125% manual zoom preference, and reloaded into page 3 with that manual zoom state retained. The tablet session retained its page target after relayout; the landscape session preserved a non-zero relative in-page offset from 0.154 to 0.131 across reload, confirming responsive resume behavior in both compact viewport modes.
+
+The new mode selector switched a loaded document from its continuous page-10 position into focused single-page mode without changing the active page. In focused mode, only page 10 rendered and the Next control advanced it cleanly to page 11, confirming page-by-page navigation remains intact.
+
+After a full reload, the same document restored directly into focused single-page mode on page 11, confirming that the selected reader mode is persisted alongside the document’s existing reading state.
+
+On a controlled portrait-phone session, the visibly labelled **Page** option activated focused mode with exactly one PDF canvas and a current-page field. Switching the desktop session back to **Scroll** restored continuous rendering of all 181 pages while retaining page 11 and its in-document position.

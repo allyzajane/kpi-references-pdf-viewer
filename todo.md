@@ -37,3 +37,6 @@
 - [x] Compact the continuous-reader header in short landscape viewports so the page canvas remains visibly usable beneath the toolbar.
 - [x] Keep an accessible compact current-page input and total-page count available in short landscape viewports.
 - [x] Exercise continuous scrolling, page navigation, and saved resume restoration in live tablet and landscape-phone reader sessions.
+- [x] Add an accessible reader-mode control that switches between continuous scrolling and focused single-page viewing.
+- [x] Persist the preferred reader mode with each authorized document’s existing reading state and preserve the current page when switching.
+- [x] Validate continuous and single-page modes across desktop and mobile viewports.

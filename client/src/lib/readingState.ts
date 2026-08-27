@@ -1,6 +1,7 @@
 import { clampZoom, type FitMode } from "./pdfViewerMath";
 
 export type SavedReadingState = {
+  mode: "continuous" | "single";
   page: number;
   pageOffset: number;
   manualZoom: number;
@@ -24,6 +25,7 @@ export function normalizeReadingState(value: unknown, pageCount: number): SavedR
   const rotationCandidate = Number(raw.rotation);
   const rotation = [0, 90, 180, 270].includes(rotationCandidate) ? rotationCandidate : 0;
   return {
+    mode: raw.mode === "single" ? "single" : "continuous",
     page: clampPage(raw.page, pageCount),
     pageOffset: Number.isFinite(offset) ? Math.min(1, Math.max(0, offset)) : 0,
     manualZoom: clampZoom(Number(raw.manualZoom) || 1),
