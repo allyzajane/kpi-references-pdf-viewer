@@ -50,3 +50,6 @@
 - [x] Live-verify the search panel controls at compact/mobile widths and record their wrapping, visibility, and usability.
 - [x] Diagnose why the published/live viewer does not visibly expose the in-document text search entry point in the user’s session.
 - [x] Restore a clear, discoverable text-search entry point and verify it after a PDF has loaded.
+- [x] Replace the Find-only launcher with an always-visible, clearly labelled document-text search field in the PDF viewer header.
+- [x] Keep search results, keyboard access, and responsive reader controls usable with the visible header field.
+- [x] Validate the visible search field in desktop and compact-width reader layouts.
