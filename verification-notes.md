@@ -73,3 +73,5 @@ In a fresh reader session, the completed index reported “824 occurrences on 17
 After advancing to the page-2 matching result, selecting its visible preview kept the focused reader on page 2. The preview action now opens the active result rather than resetting to page 1.
 
 At a controlled compact 360 px panel width, the open search UI measured 358 px of client width and 358 px of scroll width, with no horizontal overflow. The input and clear control occupy the first row; the occurrence/page status and previous, next, and close buttons wrap to a visible second row; the active result preview remains full-width below them.
+
+The reported missing search feature was reproduced as a discoverability issue: the feature was present as an icon-only magnifying-glass button in the reader toolbar. The control is now visibly labelled **Find**. In the live loaded reader, selecting **Find** immediately opened the “Find text in document” field and result controls.
