@@ -28,3 +28,12 @@
 - [x] Verify responsive reader behavior across phone, tablet, laptop, large desktop, and fullscreen viewport sizes.
 - [x] Verify the reader with a loaded PDF at a large-desktop viewport and record its adaptive canvas and toolbar behavior.
 - [x] Confirm a loaded PDF canvas at a 1920×1080 desktop viewport and persist the live verification result.
+- [x] Replace single-page navigation with smooth continuous multi-page PDF scrolling and an accurate active-page indicator.
+- [x] Add a collapsible in-viewer navigator with clickable page thumbnails and extracted document bookmarks.
+- [x] Persist and restore the last page, scroll position, zoom, fit mode, and rotation independently for each authorized PDF.
+- [x] Test continuous scrolling, thumbnails, bookmarks, and resume behavior across responsive viewports.
+- [x] Verify restoration of a non-zero in-page offset together with manual zoom and rotation, and prevent any post-restore snap to the top of the page.
+- [x] Validate continuous scrolling, page navigation, and resume state on tablet and landscape-phone viewports, then record the results.
+- [x] Compact the continuous-reader header in short landscape viewports so the page canvas remains visibly usable beneath the toolbar.
+- [x] Keep an accessible compact current-page input and total-page count available in short landscape viewports.
+- [x] Exercise continuous scrolling, page navigation, and saved resume restoration in live tablet and landscape-phone reader sessions.
