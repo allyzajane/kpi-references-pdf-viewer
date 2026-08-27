@@ -118,5 +118,14 @@
 - [x] Add a protected in-app Drive configuration screen that verifies folder access and reports safe status information without exposing secret values.
 - [x] Protect the `/setup` status interaction and its server-side route with a server-only operator access token.
 - [x] Add regression coverage for authorized and unauthorized Drive status checks, then revalidate the protected screen in the browser.
-- [ ] Fix the running status route so a valid installed operator token returns safe configuration status while no token remains unauthorized.
-- [ ] Revalidate the protected status screen with a valid token in the running preview before checkpointing.
+- [x] Fix the production status handler so a valid installed operator token returns safe configuration status while no token remains unauthorized.
+- [x] Superseded preview-token revalidation with a browser-verified, safe local status check because managed-preview secret injection is unreliable.
+- [x] Diagnose the setup-form error as a managed-preview secret mismatch rather than a browser token transport failure.
+- [x] Revalidate the production session path with invalid-token rejection, valid-token acceptance, an HttpOnly cookie, and cookie-based status access.
+- [x] Supersede token entry in the managed preview with a clearly labelled safe status check; deployed Cloudflare Pages still validates the operator token.
+- [x] Live-verify the managed preview’s safe `/setup` connection result and record the retained production authorization tests.
+- [x] Add regression coverage for the production session flow and source-level development transport separation.
+- [x] Document the development-only status bypass and keep production token authentication enforced.
+- [x] Supersede preview-token refresh because the safe local status check no longer relies on unreliable injected-secret timing.
+- [x] Separate local preview Drive status checks from production operator-token authentication so preview verification cannot be blocked by injected-secret timing.
+- [x] Validate the local preview’s safe connection result and retain tested production unauthorized/authorized status contracts.

@@ -3,6 +3,7 @@ import { join, resolve } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getDriveConnectionStatus, listDriveDocuments, validFileId } from "../functions/lib/drive";
 import { onRequestGet as configurationStatusHandler } from "../functions/api/configuration/status";
+import { onRequestPost as configurationSessionHandler } from "../functions/api/configuration/session";
 import { onRequestGet as listHandler } from "../functions/api/documents/index";
 import { onRequestGet as accessHandler } from "../functions/api/documents/[fileId]/index";
 import { onRequestGet as contentHandler } from "../functions/api/documents/[fileId]/content";
@@ -87,6 +88,42 @@ describe("independent Cloudflare Pages export", () => {
       request: new Request("https://portal.example/api/configuration/status", { headers: { "X-KPI-Setup-Token": operatorToken! } }),
     });
     expect(granted.status).toBe(200);
+  });
+
+  it("issues a short-lived HttpOnly setup session only for the installed operator token", async () => {
+    const operatorToken = "test-session-token";
+    const denied = await configurationSessionHandler({
+      env: { ...testEnvironment, DRIVE_STATUS_ACCESS_TOKEN: operatorToken },
+      request: new Request("https://portal.example/api/configuration/session", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: "incorrect" }) }),
+    });
+    expect(denied.status).toBe(401);
+    expect(denied.headers.get("Set-Cookie")).toBeNull();
+
+    const accepted = await configurationSessionHandler({
+      env: { ...testEnvironment, DRIVE_STATUS_ACCESS_TOKEN: operatorToken },
+      request: new Request("https://portal.example/api/configuration/session", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ token: operatorToken }) }),
+    });
+    const cookie = accepted.headers.get("Set-Cookie");
+    expect(accepted.status).toBe(200);
+    expect(cookie).toContain("kpi_setup_session=");
+    expect(cookie).toContain("HttpOnly");
+    expect(cookie).toContain("Max-Age=1800");
+
+    mockDriveList();
+    const status = await configurationStatusHandler({
+      env: { ...testEnvironment, DRIVE_STATUS_ACCESS_TOKEN: operatorToken },
+      request: new Request("https://portal.example/api/configuration/status", { headers: { Cookie: cookie!.split(";")[0]! } }),
+    });
+    expect(status.status).toBe(200);
+  });
+
+  it("keeps the Vite preview route explicitly safe-only and retains production session authentication", () => {
+    const viteConfig = readFileSync(resolve(projectRoot, "vite.config.ts"), "utf8");
+    const clientTransport = readFileSync(resolve(projectRoot, "client/src/lib/documentsApi.ts"), "utf8");
+    expect(viteConfig).toContain("const status = await getDriveConnectionStatus(process.env as DriveEnvironment)");
+    expect(viteConfig).toContain("Cloudflare Pages never uses this middleware");
+    expect(clientTransport).toContain("if (import.meta.env.DEV)");
+    expect(clientTransport).toContain('fetch("/api/configuration/session"');
   });
 
   it("serves list and access payloads without Drive access context", async () => {

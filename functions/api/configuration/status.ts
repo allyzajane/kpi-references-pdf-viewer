@@ -15,7 +15,8 @@ export async function onRequestGet({ env, request }: Context): Promise<Response>
   const customToken = request.headers.get("X-KPI-Setup-Token")?.trim() || "";
   const authorization = request.headers.get("Authorization")?.trim() || "";
   const bearerToken = authorization.toLowerCase().startsWith("bearer ") ? authorization.slice(7).trim() : "";
-  const suppliedToken = customToken || bearerToken;
+  const cookieToken = request.headers.get("Cookie")?.match(/(?:^|;\s*)kpi_setup_session=([^;]+)/)?.[1] ?? "";
+  const suppliedToken = customToken || bearerToken || decodeURIComponent(cookieToken);
   if (!matchingToken(accessToken, suppliedToken)) return Response.json({ error: { code: "unauthorized", message: "An operator access token is required to check Drive configuration." } }, { status: 401, headers: { "Cache-Control": "no-store", "WWW-Authenticate": "KPI-Setup-Token" } });
   const status = await getDriveConnectionStatus(env);
   return Response.json(status, {

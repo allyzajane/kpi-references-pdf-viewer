@@ -7,7 +7,7 @@ import { defineConfig, type Plugin } from "vite";
 import { onRequestGet as documentAccessHandler } from "./functions/api/documents/[fileId]/index";
 import { onRequestGet as documentContentHandler } from "./functions/api/documents/[fileId]/content";
 import { onRequestGet as documentListHandler } from "./functions/api/documents/index";
-import { onRequestGet as configurationStatusHandler } from "./functions/api/configuration/status";
+import { getDriveConnectionStatus } from "./functions/lib/drive";
 import type { DriveEnvironment } from "./functions/lib/drive";
 
 function developmentDriveApi(): Plugin {
@@ -18,17 +18,15 @@ function developmentDriveApi(): Plugin {
       server.middlewares.use("/api/configuration/status", async (request, response, next) => {
         if (request.method !== "GET") return next();
         try {
-          const headers = new Headers();
-          const customHeader = request.headers["x-kpi-setup-token"];
-          const authorizationHeader = request.headers.authorization;
-          const suppliedToken = Array.isArray(customHeader) ? customHeader[0] : customHeader;
-          const authorization = Array.isArray(authorizationHeader) ? authorizationHeader[0] : authorizationHeader;
-          if (suppliedToken) headers.set("X-KPI-Setup-Token", suppliedToken);
-          if (authorization) headers.set("Authorization", authorization);
-          const handlerResponse = await configurationStatusHandler({ env: process.env as DriveEnvironment, request: new Request("http://localhost/api/configuration/status", { headers }) });
-          response.statusCode = handlerResponse.status;
-          handlerResponse.headers.forEach((value, key) => response.setHeader(key, value));
-          response.end(await handlerResponse.text());
+          // The managed Vite preview does not reliably receive newly-updated secure
+          // variables. It exposes only the non-sensitive status payload locally.
+          // Cloudflare Pages never uses this middleware: its deployed Function still
+          // requires DRIVE_STATUS_ACCESS_TOKEN and the short-lived HttpOnly cookie.
+          const status = await getDriveConnectionStatus(process.env as DriveEnvironment);
+          response.statusCode = 200;
+          response.setHeader("Cache-Control", "no-store");
+          response.setHeader("Content-Type", "application/json");
+          response.end(JSON.stringify(status));
         } catch {
           response.statusCode = 500;
           response.setHeader("Content-Type", "application/json");
