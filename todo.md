@@ -98,3 +98,4 @@
 - [x] Replace remaining raw legacy green and stone interactive/active class names and hex values in Home and ContinuousPdfReader with the supplied blue palette.
 - [x] Recheck principal controls and active states in desktop and compact readers after the source-level palette replacement.
 - [x] Rename the visible portal brand from Folio to KPI References.
+- [x] Rename the browser-tab title to KPI References to match the visible portal brand.

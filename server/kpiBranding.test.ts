@@ -19,6 +19,7 @@ describe("KPI brand treatment", () => {
     expect(html).toContain("data:image/svg+xml");
     expect(html).toContain("%23F7CE62");
     expect(html).toContain("%231890CF");
+    expect(html).toContain("<title>KPI References</title>");
   });
 
   it("retains every provided blue theme color", () => {
