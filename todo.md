@@ -75,3 +75,8 @@
 - [x] Add automated coverage for viewport-based highlight alignment inputs across scale and rotation.
 - [x] Live-test the Matches sidebar and visible highlights in a compact/mobile viewport, including a result jump.
 - [x] Add and test shared overlay-geometry calculations for rendered page bounds across scale and rotation inputs.
+- [x] Add an accessible control to collapse and expand the left Documents sidebar while preserving the active document.
+- [x] Provide a compact collapsed sidebar rail with a clear way to restore the document list and search.
+- [x] Preserve responsive mobile document selection and ensure the reader regains available width when the sidebar is collapsed.
+- [x] Test expanded and collapsed Documents sidebar states with live document loading across desktop and compact layouts.
+- [x] Live-test compact/mobile document selection and loading after the sidebar update, then record the stacked-selector behavior.
