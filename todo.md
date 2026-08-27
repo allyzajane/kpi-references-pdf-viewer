@@ -63,3 +63,15 @@
 - [x] Live-test the final toolbar at a real compact viewport, including input, clear, no-results, and matching-page navigation controls.
 - [x] Live-verify the final one-row search toolbar in an actual compact viewport, including input entry, clear, no-results feedback, matching-page navigation, and horizontal scrolling.
 - [x] Re-run the compact toolbar interaction test at a measured 390×844 CSS viewport and record input, clear, no-results, navigation, and horizontal-scroll behavior.
+- [x] Add a compact search-results sidebar that lists every matching page with contextual preview and supports direct page jumps.
+- [x] Render visible, accessible in-page overlays for every occurrence of the active search term in continuous and single-page modes.
+- [x] Preserve highlight coordinates through fit, manual zoom, rotation, mode switches, and high-DPI canvas rendering.
+- [x] Add regression coverage for match finding, result-list navigation, and highlight-coordinate transformation.
+- [x] Validate the result sidebar and highlights across desktop, compact, continuous, and focused single-page reader layouts.
+- [x] Keep the Matches sidebar open and selected when switching reader modes during an active search.
+- [x] Limit highlight-layer rendering to near-viewport pages in continuous mode while retaining visible highlights on the focused page.
+- [x] Highlight individual occurrences within PDF text spans and document the overlay’s non-interactive accessibility behavior.
+- [x] Verify overlay alignment through manual zoom and high-DPI rendering, then record the results.
+- [x] Add automated coverage for viewport-based highlight alignment inputs across scale and rotation.
+- [x] Live-test the Matches sidebar and visible highlights in a compact/mobile viewport, including a result jump.
+- [x] Add and test shared overlay-geometry calculations for rendered page bounds across scale and rotation inputs.

@@ -194,6 +194,30 @@
   touch-action: pan-y;
 }
 
+.pdf-search-highlights {
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+.pdf-search-highlights > span,
+.pdf-search-highlights > br {
+  color: transparent;
+  cursor: text;
+  position: absolute;
+  transform-origin: 0 0;
+  white-space: pre;
+}
+
+.pdf-search-highlights .pdf-search-hit {
+  background: oklch(0.88 0.16 92 / 65%);
+  border-radius: 0.18rem;
+  box-shadow: 0 0 0 1px oklch(0.66 0.13 76 / 50%);
+  color: transparent;
+  position: static;
+}
+
 .pdf-landscape-picker {
   display: none;
 }
