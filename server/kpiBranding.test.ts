@@ -15,10 +15,13 @@ describe("KPI brand treatment", () => {
 
   it("uses the golden KPI key as the SVG favicon", () => {
     const html = readFileSync(resolve(projectRoot, "client/index.html"), "utf8");
+    const favicon = readFileSync(resolve(projectRoot, "client/public/favicon.svg"), "utf8");
     expect(html).toContain('rel="icon"');
-    expect(html).toContain("data:image/svg+xml");
-    expect(html).toContain("%23F7CE62");
-    expect(html).toContain("%231890CF");
+    expect(html).toContain('href="/favicon.svg"');
+    expect(favicon).toContain('cx="9" cy="12" r="6.25"');
+    expect(favicon).toContain('d="M13.8 15.8H27.2V19.1H24.4V22H21.4V19.1H18.7V17.8H13.8V15.8Z"');
+    expect(favicon).toContain('fill="#F7CE62"');
+    expect(favicon).toContain('fill="#1890CF"');
     expect(html).toContain("<title>Opening KPI References...</title>");
   });
 

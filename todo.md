@@ -100,3 +100,4 @@
 - [x] Rename the visible portal brand from Folio to KPI References.
 - [x] Rename the browser-tab title to KPI References to match the visible portal brand.
 - [x] Add a branded browser-tab loading title that changes to KPI References when the portal is ready.
+- [x] Ensure the browser favicon uses the golden KPI key icon consistently with the portal brand.
