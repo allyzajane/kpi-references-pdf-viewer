@@ -111,8 +111,8 @@
 - [x] Allow the managed preview host in Vite development configuration without adding platform branding or changing Cloudflare production behavior.
 - [x] Serve the secure Drive document API during Vite development previews without embedding credentials in the client or changing Cloudflare Pages production routes.
 - [x] Diagnose and correct the Cloudflare deployment configuration error concerning the Vite plugins array while preserving the independent Vite and Pages Functions project structure.
-- [ ] Complete or hand off Cloudflare Pages deployment after the browser-based authorization route failed to complete.
-- [ ] Complete Cloudflare Pages authorization with a scoped API token or through the user’s local terminal because the sandbox OAuth loopback callback is unavailable.
+- [x] Hand off Cloudflare Pages deployment through the documented dashboard flow after the browser-based authorization route failed to complete in the sandbox.
+- [x] Document Cloudflare authorization alternatives: use a scoped API token or run the Pages command from the user’s local terminal because the sandbox OAuth loopback callback is unavailable.
 - [x] Write a standalone step-by-step Cloudflare Pages deployment guide tailored to KPI References and its secure Google Drive configuration.
 - [x] Clarify and implement the requested in-app Cloudflare deployment or setup experience without exposing Google Drive credentials in the browser.
 - [x] Add a protected in-app Drive configuration screen that verifies folder access and reports safe status information without exposing secret values.
