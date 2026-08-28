@@ -36,8 +36,12 @@ describe("independent Cloudflare Pages export", () => {
     const viteConfig = readFileSync(resolve(projectRoot, "vite.config.ts"), "utf8");
     expect(manifest.scripts.build).toBe("vite build");
     expect(manifest.scripts["cf:dev"]).toBe("wrangler pages dev dist");
-    expect(manifest.scripts["cf:deploy"]).toBe("wrangler pages deploy dist");
+    expect(manifest.scripts["cf:deploy"]).toBe("npx wrangler pages deploy dist --project-name=kpi-references-pdf-viewer");
+    expect(manifest.scripts["cf:deploy"]).not.toContain(["wrangler", "deploy", "dist"].join(" "));
     expect(viteConfig).toContain("plugins: [react(), tailwindcss(), developmentDriveApi()]");
+    const wranglerConfig = readFileSync(resolve(projectRoot, "wrangler.jsonc"), "utf8");
+    expect(wranglerConfig).toContain('"pages_build_output_dir": "./dist"');
+    expect(wranglerConfig).not.toContain('"main"');
   });
 
   it("keeps Drive identifiers bounded before a Pages Function uses them", () => {

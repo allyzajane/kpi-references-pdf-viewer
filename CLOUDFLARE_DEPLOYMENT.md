@@ -39,10 +39,11 @@ Set the build configuration exactly as follows. Cloudflare’s React (Vite) pres
 | Production branch | `main` |
 | Build command | `pnpm run build` |
 | Build output directory | `dist` |
+| Deploy command | Leave blank for Git-integrated Pages deployment |
 | Root directory | Leave blank unless the app is inside a monorepo subdirectory |
 | Node version | 22 or later |
 
-Do **not** set the build command to `wrangler deploy` or `npx wrangler deploy`. Those commands are for Worker deployments and cause Cloudflare to attempt a Worker-style Vite integration. This project uses Pages and will discover its server-side endpoints from the `functions/` directory during a Pages deployment.[2]
+Do **not** set the build command or deploy command to `wrangler deploy` or `npx wrangler deploy`. Those commands are for Worker deployments and cause Cloudflare to attempt a Worker-style Vite integration. For Git-integrated Pages deployment, leave Deploy command blank. If you deploy manually from a local terminal, use `npx wrangler pages deploy dist --project-name=kpi-references-pdf-viewer`. This project uses Pages and will discover its server-side endpoints from the `functions/` directory during a Pages deployment.[2]
 
 ## 3. Set the Google Drive environment variables
 
@@ -92,7 +93,7 @@ pnpm run build
 pnpm run cf:deploy
 ```
 
-The `cf:deploy` command runs `wrangler pages deploy dist`. This is the correct command for the Pages project. If the CLI opens an authorization page, complete it in a browser on the same computer; the callback expects access to your computer’s localhost address.
+The `cf:deploy` command runs `npx wrangler pages deploy dist --project-name=kpi-references-pdf-viewer`. This is the correct command for the Pages project. If the CLI opens an authorization page, complete it in a browser on the same computer; the callback expects access to your computer’s localhost address.
 
 ## 6. Verify the production portal
 

@@ -11,7 +11,7 @@
     "check": "tsc --noEmit",
     "test": "vitest run",
     "cf:dev": "wrangler pages dev dist",
-    "cf:deploy": "wrangler pages deploy dist"
+    "cf:deploy": "npx wrangler pages deploy dist --project-name=kpi-references-pdf-viewer"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",

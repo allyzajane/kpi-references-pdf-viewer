@@ -129,3 +129,5 @@
 - [x] Supersede preview-token refresh because the safe local status check no longer relies on unreliable injected-secret timing.
 - [x] Separate local preview Drive status checks from production operator-token authentication so preview verification cannot be blocked by injected-secret timing.
 - [x] Validate the local preview’s safe connection result and retain tested production unauthorized/authorized status contracts.
+- [x] Audit and correct Cloudflare Pages deployment configuration so no repository script invokes Worker-style `wrangler deploy`.
+- [x] Validate the static Vite build output, Pages configuration, dashboard values, and unchanged application behavior.
